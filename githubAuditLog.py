@@ -57,7 +57,6 @@ def additemtodb():
     response = requests.get(ghURL, headers=head)
     pretty_json = json.loads(response.text) or json.loads(value)
     docid = pretty_json[0]['_document_id']
-    print (ghURL)
     dynamodb = boto3.client('dynamodb')
     try:
         dynamodb.put_item(TableName=tableName,
@@ -72,8 +71,7 @@ def additemtodb():
             print("Index out of range")
 
     else:
-        print ("sending stuff")
-        #getuiplog(ghsecret)
+        getuiplog(ghsecret)
 
 
 def getuiplog(ghsecret):
@@ -81,7 +79,7 @@ def getuiplog(ghsecret):
     response = requests.get(ghURL, headers=head)
     pretty_json = json.loads(response.text)
     email_body = (json.dumps(pretty_json, indent=4, sort_keys=True) +
-                  "\n Please Visit \")
+                  "\n Please Visit https://whateverwebsite")
     client = boto3.client('sns')
     response = client.publish(
         TargetArn=topicArn,
