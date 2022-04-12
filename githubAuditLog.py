@@ -18,11 +18,11 @@ region = os.environ['region']
 topicArn = os.environ['topicArn']
 tableName = os.environ['tableName']
 today = date.today()
-org = os.environ['ghorg']
+org = os.environ['ghorg'].strip()
 repo = os.environ['ghrepo']
-ghURL = 'https://api.github.com/orgs/{0}/audit-log?phrase=repo: \
-         {0}/{1}+action:protected_branch.policy_override+created:{2}' \
-         .format(org, repo, today)
+ghURL = 'https://api.github.com/orgs/{0}/audit-log?phrase=\
+        repo:{0}/{1}+action:protected_branch.policy_override+created:{2}' \
+         .format(org, repo, today).replace(" ", "")
 value = '[{"org": "'+org+'", "_document_id": "logempty"}]'
 
 
@@ -57,6 +57,7 @@ def additemtodb():
     response = requests.get(ghURL, headers=head)
     pretty_json = json.loads(response.text) or json.loads(value)
     docid = pretty_json[0]['_document_id']
+    print (ghURL)
     dynamodb = boto3.client('dynamodb')
     try:
         dynamodb.put_item(TableName=tableName,
@@ -65,13 +66,14 @@ def additemtodb():
                           (document_id)",)
     except ClientError as e:
         if e.response['Error']['Code'] == 'ConditionalCheckFailedException':
-            print(" Item Already Exists No new Protected \
-                    branch Policy Overrides for {0}".format(today))
+            print(" Item Already Exists No new Protected branch Policy " +
+                  "Overrides for {0}".format(today))
         elif e.response['Error']['Code'] == 'list index out of range':
             print("Index out of range")
 
     else:
-        getuiplog(ghsecret)
+        print ("sending stuff")
+        #getuiplog(ghsecret)
 
 
 def getuiplog(ghsecret):
@@ -79,7 +81,7 @@ def getuiplog(ghsecret):
     response = requests.get(ghURL, headers=head)
     pretty_json = json.loads(response.text)
     email_body = (json.dumps(pretty_json, indent=4, sort_keys=True) +
-                  "\n Please Visit ")
+                  "\n Please Visit \")
     client = boto3.client('sns')
     response = client.publish(
         TargetArn=topicArn,
