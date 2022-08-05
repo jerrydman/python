@@ -2,6 +2,7 @@
 # This keeps username the same and rotate password
 # it should be in JSON format inside secrets manager
 # {"username": "$username", "password": "password"}
+# you can change line 39 for whatever needs to be as well
 # Jerry Reid
 
 
