@@ -38,7 +38,7 @@ def update_secret(secretarn):
     data = {}
     data['username'] = id1['username']
     data['password'] = password
-    #above codes creates the json with email as it was
+    #above codes creates the json with username as it was
     client.update_secret(SecretId=secretarn,Description=description,SecretString=json.dumps(data))
     
 def lambda_handler(event, context):
