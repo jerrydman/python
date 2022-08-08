@@ -1,7 +1,6 @@
-#Lambda to rotate credentials
+# Lambda to rotate credentials
 # Gets Username and SNS topic from tags
-##TODO
-#figure out delete after x amount of days
+# This will disable and delete and put new one in secrets manager
 
 import boto3
 from botocore.exceptions import ClientError
@@ -9,10 +8,10 @@ import datetime
 import json
 import sys
 
-AWS_REGION_NAME='us-west-2'
-
 iam_client = boto3.client('iam')
 secretmanager = boto3.client('secretsmanager')
+session = boto3.session.Session()
+AWS_REGION_NAME = session.region_name
 sns = boto3.client('sns', region_name=AWS_REGION_NAME)
 
 
@@ -47,7 +46,6 @@ def get_username(secret):
         secret = get_secret_value_response['Tags']
         data = json.dumps(secret)
         pretty_data = json.loads(data)
-        print (pretty_data)
         names = [dict['Value'] for dict in pretty_data if dict['Key'] == 'Name']
         aws_user_name = " ".join(names)
         return (aws_user_name)
