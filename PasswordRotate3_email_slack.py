@@ -12,14 +12,14 @@ import random
 import json
 import urllib3
 
-# sns topic for notification
+# sns topic for notification and slack url if needed
 sns_topic = os.environ['sns_topic']
 url = os.environ['slack_url']
 http = urllib3.PoolManager()
 
 #Variables
 charset = string.punctuation + string.ascii_letters #Can also make a custom map if needed
-description = "Test Secret compliance"
+description = "Test Secret for compliance"
 passwordlength = 64 #Default is no length tag is created
 
 
@@ -57,16 +57,30 @@ def update_secret(secretarn):
     data = {}
     data[firstvalue] = id1[firstvalue]
     data[secondvalue] = password
-    #above codes creates the json with email as it was
+    #above codes creates the json with keys as it was
     client.update_secret(SecretId=secretarn,Description=description,SecretString=json.dumps(data))
     emailmsg = 'Hello,\n\n' \
         'A new password has been created for key rotation for' + secretarn
     slack_message = {
-               "type": "text",
-               "text": "Password updated for " + "```" + secretarn + "```"
+      "blocks": [
+            {
+                "type": "section",
+                "fields": [
+                    {
+                        "type": "mrkdwn",
+                        "text": "Password updated for:  "+ "```" + secretarn + "```"
+                    },
+                    {
+                        "type": "mrkdwn",
+                        "text": "Username: "+ id1[firstvalue] + "\n Password" + " " + "```" + password + "```"
+                    },
+                ]
             }
+        ]
+    }
+    #Send to slack
     slack = http.request('POST',url,body=json.dumps(slack_message))
-
+    #Send to email
     sns.publish(TopicArn=sns_topic,Message=emailmsg)
     
 def lambda_handler(event, context):
