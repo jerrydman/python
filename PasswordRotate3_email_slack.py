@@ -19,7 +19,7 @@ http = urllib3.PoolManager()
 
 #Variables
 charset = string.punctuation + string.ascii_letters #Can also make a custom map if needed
-description = "Test Secret for SOX compliance"
+description = "Test Secret for compliance"
 passwordlength = 64 #Default is no length tag is created
 
 
