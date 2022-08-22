@@ -19,7 +19,7 @@ http = urllib3.PoolManager()
 
 #Variables
 charset = string.punctuation + string.ascii_letters #Can also make a custom map if needed
-description = "Test Secret for compliance"
+description = "Test Secret for SOX compliance"
 passwordlength = 64 #Default is no length tag is created
 
 
@@ -72,7 +72,7 @@ def update_secret(secretarn):
                     },
                     {
                         "type": "mrkdwn",
-                        "text": "Username: "+ id1[firstvalue] + "\n Password" + " " + "```" + password + "```"
+                        "text": firstvalue + " "+  id1[firstvalue] + "\n " + secondvalue + " " + "```" + password + "```"
                     },
                 ]
             }
