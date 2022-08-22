@@ -72,7 +72,7 @@ def update_secret(secretarn):
                     },
                     {
                         "type": "mrkdwn",
-                        "text": firstvalue + " "+  id1[firstvalue] + "\n " + secondvalue + " " + "```" + password + "```"
+                        "text": firstvalue + ":" + " "+  id1[firstvalue] + "\n" + secondvalue + " " + "```" + password + "```"
                     },
                 ]
             }
