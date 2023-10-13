@@ -6,7 +6,6 @@
 # This will allow grafana to graph it so we can get a dashboard
 
 ##ToDo
-# Create functions for each
 # create log group using pipeline for proper encryption; add username string via script
 
 
@@ -22,6 +21,9 @@ from datetime import date
 session = boto3.Session()
 os.environ['AWS_PROFILE'] = "<profile>"
 os.environ['AWS_DEFAULT_REGION'] = "us-west-2"
+tag_created_by = 'CreatedBy'
+tag_owner = 'Service' #Service for now
+tag_purpose = 'Service' #Service for now
 
 # Initialize the Boto3 IAM client
 iam = session.client('iam')
@@ -41,10 +43,30 @@ try:
 except:
     print("Log group already exists")
 
+
+def get_specific_iam_user_tag(user_name, tag_key):
+    iam_client = boto3.client('iam')
+    try:
+        response = iam_client.list_user_tags(UserName=user_name)
+        # Extract and search for the specific tag by its key
+        tags = response['Tags']
+        desired_tag = tag_key
+        for tag in tags:
+            if tag['Key'] == tag_key:
+                desired_tag = tag
+                break
+        # Check if the tag was found and return its value
+        if desired_tag:
+            return desired_tag['Value']
+        else:
+            return None  # Tag not found
+    except Exception as e:
+        print(f"Error: {str(e)}")
+        return None  # Error occurred
+
 # Iterate through the list of IAM users
 for user in response['Users']:
     user_name = user['UserName']
-    print(user_name)
 
     # List access keys for the user
     access_keys = iam.list_access_keys(UserName=user_name)
@@ -67,6 +89,10 @@ for user in response['Users']:
         currentdate = date.today()
         age_of_key = str((currentdate - accesskeydate).days) + " days"
 
+        # get tags
+        created_by_tag = get_specific_iam_user_tag(user_name, tag_created_by)
+        purpose_tag = get_specific_iam_user_tag(user_name, tag_purpose)
+        owner_tag = get_specific_iam_user_tag(user_name, tag_owner)
 
         # Prepare IAM user data as a dictionary
         user_data = {
@@ -75,7 +101,10 @@ for user in response['Users']:
             'Status': status,
             'LastUsedDate': last_used_date.strftime('%Y-%m-%d')if last_used_date else 'N/A',
             'ExpirationDate': expiration_date.strftime('%Y-%m-%d'),
-            'Age of Key' : age_of_key
+            'Age of Key' : age_of_key,
+            'Owner' : owner_tag,
+            'Purpose': purpose_tag,
+            'github link' : created_by_tag
         }
 
         # Send IAM user data to CloudWatch Logs
@@ -83,6 +112,7 @@ for user in response['Users']:
         # if logstream exist update else create new and put into function
         print(user_data)
         log_message = json.dumps(user_data)
+       # this will be created via argo
         try:
             cloudwatchlogs.create_log_stream(logGroupName=log_group_name,logStreamName=user_name)
         except:
@@ -98,7 +128,6 @@ for user in response['Users']:
             ]
         )
 
-
 # Sample Output
 # {
 #     "UserName": "$username",
@@ -106,6 +135,9 @@ for user in response['Users']:
 #     "Status": "Active",
 #     "LastUsedDate": "N/A",
 #     "ExpirationDate": "2021-10-18",
-#     "Age of Key": "813 days"
+#     "Age of Key": "813 days",
+#     "Owner" : "owner_tag",
+#     "Purpose": "purpose_tag",
+#     "github link" : "created_by_tag"
 # }
 
