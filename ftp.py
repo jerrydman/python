@@ -25,5 +25,3 @@ async def on_message(message):
         await message.channel.send(GIF_URL)
 
 client.run(TOKEN)
-
-
