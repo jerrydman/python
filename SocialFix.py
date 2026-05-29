@@ -15,14 +15,13 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# ── Logging ───────────────────────────────────────────────────────────────────
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
 )
 log = logging.getLogger("embed-fixer")
 
-# ── Config ────────────────────────────────────────────────────────────────────
+
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
 
 INSTAGRAM_FIX_DOMAIN = "kkinstagram.com"
@@ -39,7 +38,6 @@ TIKTOK_RE = re.compile(
     re.IGNORECASE,
 )
 
-# ── Bot setup ─────────────────────────────────────────────────────────────────
 intents = discord.Intents.default()
 intents.message_content = True
 intents.messages = True
@@ -47,7 +45,6 @@ intents.messages = True
 bot = commands.Bot(command_prefix=commands.when_mentioned, intents=intents)
 
 
-# ── Helpers ───────────────────────────────────────────────────────────────────
 
 def fix_instagram(url: str) -> str:
     return re.sub(r"(?:www\.)?instagram\.com", INSTAGRAM_FIX_DOMAIN, url, flags=re.IGNORECASE)
@@ -95,7 +92,6 @@ async def get_or_create_webhook(channel: discord.TextChannel) -> discord.Webhook
     return await channel.create_webhook(name="Embed Fixer")
 
 
-# ── Events ────────────────────────────────────────────────────────────────────
 
 @bot.event
 async def on_ready():
